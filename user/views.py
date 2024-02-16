@@ -3,6 +3,7 @@ from django.views.generic import ListView
 from django.http import JsonResponse
 from user.models import Employee
 from .forms import EmployeeSortForm
+from django.db.models import Q
 
 
 class EmployeeListView(ListView):
@@ -21,10 +22,25 @@ class EmployeesListView(ListView):
 
     def get_queryset(self):
         form = EmployeeSortForm(self.request.GET)
-        if form.data:
-            if form.is_valid():
-                sort_by = form.cleaned_data['sort_by']
-                return Employee.objects.all().order_by(sort_by)
+        if form.is_valid():
+            sort_by = form.cleaned_data['sort_by']
+            search_query = form.cleaned_data['search_query']
+            queryset = Employee.objects.all()
+
+            if search_query:
+                queryset = queryset.filter(
+                    Q(full_name__icontains=search_query) |
+                    Q(position__icontains=search_query) |
+                    Q(email__icontains=search_query) |
+                    Q(hire_date__icontains=search_query) |
+                    Q(level__icontains=search_query)
+
+                ).order_by('full_name')
+
+            if sort_by:
+                queryset = queryset.order_by(sort_by)
+
+            return queryset
         return Employee.objects.all()
 
     def get_context_data(self, **kwargs):

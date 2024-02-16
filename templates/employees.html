@@ -4,13 +4,17 @@
 <form method="get" action="{% url 'employees' %}">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Sort</button>
+    <button type="submit">Apply Filters</button>
 </form>
 
 {% for employee in employees %}
-    <h1>{{ employee.full_name }}</h1>
-    <h2>{{ employee.level }}</h2>
-    <p>{{ employee.position }}</p>
-    <p>{{ employee.email }}</p>
+    <div>
+        <h1>{{ employee.full_name  }}</h1>
+        <h2>{{ employee.level }}</h2>
+        <p>{{ employee.position }}</p>
+        <p>{{ employee.email }}</p>
+    </div>
 {% endfor %}
+
+
 {% endblock %}
