@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+
+      {% for i in employees %}
+
+<h1>{{i.full_name}}</h1>
+        <h2>{{i.level}}</h2>
+<p>{{i.position}}</p>
+<p>{{i.email}}</p>
+
+{% endfor %}
+
+{% endblock %}

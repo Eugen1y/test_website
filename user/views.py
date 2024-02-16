@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import ListView
-
+from django.http import JsonResponse
 from user.models import Employee
 
 
@@ -10,10 +10,16 @@ class EmployeeListView(ListView):
     context_object_name = 'page_obj'
 
     def get_queryset(self):
-        return Employee.objects.filter(level__in=[1,2])
+        return Employee.objects.filter(level__in=[1, 2])
 
 
-from django.http import JsonResponse
+class EmployeesListView(ListView):
+    model = Employee
+    template_name = 'employees.html'
+    context_object_name = 'employees'
+
+    def get_queryset(self):
+        return Employee.objects.all()
 
 
 def load_hierarchy(request, employee_id):
