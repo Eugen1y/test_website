@@ -62,7 +62,7 @@ def run_seed(mode):
     employees = []
     dct = []
     supervisors = []
-    levels = [10, 500, 2500, 2500, 2500, 15000, 30000]
+    # levels = [10, 500, 2500, 2500, 2500, 1500, 3000]
     levels = [1, 2, 4, 8, 16]
     for level, num_employees in enumerate(levels, start=1):
         supervisor = None

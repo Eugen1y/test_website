@@ -1,20 +1,16 @@
 {% extends 'base.html' %}
-{% block content %}
 {% load static %}
-<form method="get" action="{% url 'employees' %}">
+{% block content %}
+<form id="employee-sort-form" method="get">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Apply Filters</button>
+    <button type="submit">Submit</button>
 </form>
 
-{% for employee in employees %}
-    <div>
-        <h1>{{ employee.full_name  }}</h1>
-        <h2>{{ employee.level }}</h2>
-        <p>{{ employee.position }}</p>
-        <p>{{ employee.email }}</p>
-    </div>
-{% endfor %}
+<div id="employee-list">
+    {% include 'employee_list_partial.html' %}
+</div>
 
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'employees_search_and_sort.js' %}"></script>
 {% endblock %}

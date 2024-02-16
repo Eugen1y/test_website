@@ -34,7 +34,6 @@ class EmployeesListView(ListView):
                     Q(email__icontains=search_query) |
                     Q(hire_date__icontains=search_query) |
                     Q(level__icontains=search_query)
-
                 ).order_by('full_name')
 
             if sort_by:
@@ -47,6 +46,12 @@ class EmployeesListView(ListView):
         context = super().get_context_data(**kwargs)
         context['form'] = EmployeeSortForm(self.request.GET)
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.is_ajax():
+            html = render(self.request, 'employee_list_partial.html', context).content.decode('utf-8')
+            return JsonResponse({'html': html})
+        return super().render_to_response(context, **response_kwargs)
 
 
 def load_hierarchy(request, employee_id):
@@ -64,13 +69,23 @@ def load_hierarchy(request, employee_id):
     return JsonResponse(data, safe=False)
 
 
-def employee_list(request):
-    form = EmployeeSortForm(request.GET)
-
-    if form.is_valid():
-        sort_by = form.cleaned_data['sort_by']
-        employees = Employee.objects.all().order_by(sort_by)
+def load_employee_list(request, search_query=None):
+    # Получить список пользователей по заданному поисковому запросу
+    if search_query:
+        employees = Employee.objects.filter(
+            Q(full_name__icontains=search_query) |
+            Q(position__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(hire_date__icontains=search_query) |
+            Q(level__icontains=search_query)
+        ).order_by('full_name')
     else:
         employees = Employee.objects.all()
 
-    return render(request, 'employees.html', {'employees': employees, 'form': form})
+    # Подготовить данные для возврата в формате JSON
+    data = {
+        'employees': [{'id': emp.id, 'name': emp.full_name, 'position': emp.position, 'email': emp.email} for emp in employees],
+    }
+
+    # Вернуть данные в формате JSON
+    return JsonResponse(data, safe=False)
