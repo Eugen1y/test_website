@@ -1,13 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load static %}
+<form method="get" action="{% url 'employees' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Sort</button>
+</form>
 
-      {% for i in employees %}
-
-<h1>{{i.full_name}}</h1>
-        <h2>{{i.level}}</h2>
-<p>{{i.position}}</p>
-<p>{{i.email}}</p>
-
+{% for employee in employees %}
+    <h1>{{ employee.full_name }}</h1>
+    <h2>{{ employee.level }}</h2>
+    <p>{{ employee.position }}</p>
+    <p>{{ employee.email }}</p>
 {% endfor %}
-
 {% endblock %}

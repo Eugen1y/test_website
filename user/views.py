@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views.generic import ListView
 from django.http import JsonResponse
 from user.models import Employee
+from .forms import EmployeeSortForm
 
 
 class EmployeeListView(ListView):
@@ -19,7 +20,17 @@ class EmployeesListView(ListView):
     context_object_name = 'employees'
 
     def get_queryset(self):
+        form = EmployeeSortForm(self.request.GET)
+        if form.data:
+            if form.is_valid():
+                sort_by = form.cleaned_data['sort_by']
+                return Employee.objects.all().order_by(sort_by)
         return Employee.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = EmployeeSortForm(self.request.GET)
+        return context
 
 
 def load_hierarchy(request, employee_id):
@@ -35,3 +46,15 @@ def load_hierarchy(request, employee_id):
 
     # Повернути дані у форматі JSON
     return JsonResponse(data, safe=False)
+
+
+def employee_list(request):
+    form = EmployeeSortForm(request.GET)
+
+    if form.is_valid():
+        sort_by = form.cleaned_data['sort_by']
+        employees = Employee.objects.all().order_by(sort_by)
+    else:
+        employees = Employee.objects.all()
+
+    return render(request, 'employees.html', {'employees': employees, 'form': form})
