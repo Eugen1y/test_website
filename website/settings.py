@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'website.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'django',
+        'NAME': 'django1',
         'USER': 'django',
         'PASSWORD': 'password',
         'HOST': 'localhost',
@@ -88,6 +88,8 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
+
+AUTH_USER_MODEL = 'user.Employee'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

@@ -38,8 +38,14 @@
             </a>
             <div class="nav-collapse">
                 <ul class="nav">
-                    <li><a href="{% url 'employee' %}">Home</a></li>
+                    <li><a href="{% url 'home' %}">Home</a></li>
                     <li><a href="{% url 'employees' %}">Employees</a></li>
+                    {% if request.user.is_authenticated %}
+                    <li><a href="">{{ request.user.full_name }}</a></li>
+                    <li><a href="{%url 'logout' %}" >Выйти</a></li>
+                    {% else %}
+                    <li><a href="{%url 'sign-in' %}" >Войти</a></li>
+                    {% endif %}
 
                 </ul>
             </div><!--/.nav-collapse -->

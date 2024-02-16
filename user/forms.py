@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 
 
 class EmployeeSortForm(forms.Form):
@@ -13,3 +14,8 @@ class EmployeeSortForm(forms.Form):
 
     sort_by = forms.ChoiceField(choices=SORT_CHOICES, required=False, label='Sort by')
     search_query = forms.CharField(max_length=255, required=False, label='Search')
+
+
+
+class SignInForm(AuthenticationForm):
+    pass

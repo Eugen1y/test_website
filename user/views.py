@@ -1,10 +1,12 @@
+from django.contrib.auth.views import LoginView
 from django.shortcuts import render
-from django.views.generic import ListView
+from django.urls import reverse_lazy
+from django.views.generic import ListView, RedirectView
 from django.http import JsonResponse
 from user.models import Employee
-from .forms import EmployeeSortForm
+from .forms import EmployeeSortForm, SignInForm
 from django.db.models import Q
-
+from django.contrib.auth import logout
 
 class EmployeeListView(ListView):
     model = Employee
@@ -13,6 +15,9 @@ class EmployeeListView(ListView):
 
     def get_queryset(self):
         return Employee.objects.filter(level__in=[1, 2])
+
+
+
 
 
 class EmployeesListView(ListView):
@@ -84,8 +89,29 @@ def load_employee_list(request, search_query=None):
 
     # Подготовить данные для возврата в формате JSON
     data = {
-        'employees': [{'id': emp.id, 'name': emp.full_name, 'position': emp.position, 'email': emp.email} for emp in employees],
+        'employees': [{'id': emp.id, 'name': emp.full_name, 'position': emp.position, 'email': emp.email} for emp in
+                      employees],
     }
 
     # Вернуть данные в формате JSON
     return JsonResponse(data, safe=False)
+
+
+class UserSignInView(LoginView):
+    """User sign-in views implementation"""
+    form_class = SignInForm
+    template_name = 'sign-in.html'
+
+    def get_success_url(self):
+        return reverse_lazy('home')
+
+
+class UserLogoutView(RedirectView):
+    """User logout views implementation"""
+
+    def get_redirect_url(self, *args, **kwargs):
+        return reverse_lazy('home')
+
+    def get(self, request, *args, **kwargs):
+        logout(request)
+        return super(UserLogoutView, self).get(request, *args, **kwargs)

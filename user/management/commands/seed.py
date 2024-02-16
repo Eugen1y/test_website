@@ -4,6 +4,7 @@ import time
 import django
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.utils.text import slugify
 from django_seed import Seed
 from faker import Faker
 
@@ -62,14 +63,18 @@ def run_seed(mode):
     employees = []
     dct = []
     supervisors = []
-    # levels = [10, 500, 2500, 2500, 2500, 1500, 3000]
     levels = [1, 2, 4, 8, 16]
+
     for level, num_employees in enumerate(levels, start=1):
         supervisor = None
 
         for i in range(num_employees):
             if level != 1:
                 supervisor = random.choice(supervisors)
+
+            # Генерация уникального имени пользователя
+            username = f"{fake.user_name()}_{level}_{i}"
+
             employee = Employee.objects.create(
                 full_name=fake.name(),
                 position=fake.job(),
@@ -77,15 +82,18 @@ def run_seed(mode):
                 email=fake.email(),
                 supervisor=supervisor,
                 level=level,
+                username=username,
             )
             employees.append(employee)
+            password = fake.password()
+            employee.set_password(password)
             employee.save()
+            print(f"Created user: {username}, Password: {password}")
+
         dct.append(employees)
         supervisors = employees
         employees = []
     # clear_data()
-
-
 
 # def run_seed(mode):
 #     """ Seed database based on mode
