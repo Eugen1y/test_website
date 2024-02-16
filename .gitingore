@@ -1,5 +1,0 @@
-.venv/
-.idea/
-__pycache__/
-user/__pycache__/
-website/__pycache__/
