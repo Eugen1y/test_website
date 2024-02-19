@@ -1,10 +1,6 @@
 import os
-import time
-
 import django
-from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.utils.text import slugify
 from django_seed import Seed
 from faker import Faker
 
@@ -63,7 +59,8 @@ def run_seed(mode):
     employees = []
     dct = []
     supervisors = []
-    levels = [1, 2, 4, 8, 16]
+    levels = [10, 500, 2500, 2500, 2500, 15000, 30000]
+    # levels = [1, 2, 4, 8, 16]
 
     for level, num_employees in enumerate(levels, start=1):
         supervisor = None

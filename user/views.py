@@ -11,6 +11,7 @@ from django.contrib.auth import logout
 
 
 class EmployeeListView(ListView):
+    """View to display a list of employees."""
     model = Employee
     template_name = 'employee.html'
     context_object_name = 'page_obj'
@@ -20,11 +21,13 @@ class EmployeeListView(ListView):
 
 
 class EmployeesListView(ListView):
+    """View to display a list of employees with sorting and searching options."""
     model = Employee
     template_name = 'employees.html'
     context_object_name = 'employees'
 
     def get_queryset(self):
+        """Override queryset to filter, sort, and search employees."""
         form = EmployeeSortForm(self.request.GET)
         if form.is_valid():
             sort_by = form.cleaned_data['sort_by']
@@ -47,11 +50,13 @@ class EmployeesListView(ListView):
         return Employee.objects.exclude(is_superuser=True)
 
     def get_context_data(self, **kwargs):
+        """Add the EmployeeSortForm to the context."""
         context = super().get_context_data(**kwargs)
         context['form'] = EmployeeSortForm(self.request.GET)
         return context
 
     def render_to_response(self, context, **response_kwargs):
+        """Render the view and support Ajax rendering."""
         if self.request.is_ajax():
             html = render(self.request, 'employee_list_partial.html', context).content.decode('utf-8')
             return JsonResponse({'html': html})
@@ -59,22 +64,21 @@ class EmployeesListView(ListView):
 
 
 def load_hierarchy(request, employee_id):
-    # Отримати дані для обраного співробітника (employee_id) та його підлеглих
+    """Load the hierarchical structure of employees for a specific supervisor."""
     supervisor = Employee.objects.get(id=employee_id)
     subordinates = Employee.objects.filter(supervisor=supervisor)
 
-    # Підготовити дані для відправки у форматі JSON
     data = {
         'supervisor': {'id': supervisor.id, 'name': supervisor.full_name},
-        'subordinates': [{'id': sub.id, 'name': sub.full_name,'subordinates_count':len(sub.employee_set.all())} for sub in subordinates],
+        'subordinates': [{'id': sub.id, 'name': sub.full_name, 'subordinates_count': len(sub.employee_set.all())} for
+                         sub in subordinates],
     }
 
-    # Повернути дані у форматі JSON
     return JsonResponse(data, safe=False)
 
 
 def load_employee_list(request, search_query=None):
-    # Получить список пользователей по заданному поисковому запросу
+    """Load the list of employees based on the search query."""
     if search_query:
         employees = Employee.objects.filter(
             Q(full_name__icontains=search_query) |
@@ -86,13 +90,11 @@ def load_employee_list(request, search_query=None):
     else:
         employees = Employee.objects.all().exclude(is_superuser=True)
 
-    # Подготовить данные для возврата в формате JSON
     data = {
         'employees': [{'id': emp.id, 'name': emp.full_name, 'position': emp.position, 'email': emp.email} for emp in
                       employees],
     }
 
-    # Вернуть данные в формате JSON
     return JsonResponse(data, safe=False)
 
 
@@ -102,6 +104,7 @@ class UserSignInView(LoginView):
     template_name = 'sign-in.html'
 
     def get_success_url(self):
+        """Get the URL to redirect to upon successful login."""
         return reverse_lazy('home')
 
 
@@ -109,38 +112,42 @@ class UserLogoutView(RedirectView):
     """User logout views implementation"""
 
     def get_redirect_url(self, *args, **kwargs):
+        """Get the URL to redirect to upon logout."""
         return reverse_lazy('home')
 
     def get(self, request, *args, **kwargs):
+        """Handle user logout."""
         logout(request)
         return super(UserLogoutView, self).get(request, *args, **kwargs)
 
 
 class ProfileView(LoginRequiredMixin, DetailView):
+    """View to display user profile information."""
     model = Employee
     template_name = 'profile.html'
     context_object_name = 'employee'
 
 
-
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    """View to update user profile information."""
     model = Employee
     template_name = 'employee_form.html'
     form_class = EmployeeForm
 
     def get_success_url(self):
+        """Get the URL to redirect to upon successful profile update."""
         return reverse_lazy('profile', kwargs={'pk': self.object.pk})
 
 
-
-
 class ProfileDeleteView(LoginRequiredMixin, DeleteView):
+    """View to delete user profile."""
     model = Employee
     template_name = 'employee_confirm_delete.html'
     success_url = reverse_lazy('home')
 
 
 def ajax_supervisors(request):
+    """Load supervisors based on the selected level."""
     selected_level = request.GET.get('level', None)
     selected_level = int(selected_level) - 1
     supervisors = Employee.objects.filter(level=selected_level).values('id', 'full_name').exclude(

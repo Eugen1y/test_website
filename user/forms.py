@@ -7,6 +7,7 @@ from user.models import Employee
 
 
 class EmployeeSortForm(forms.Form):
+    """Form for sorting and searching employees."""
     SORT_CHOICES = (
         ('', ''),
         ('full_name', 'Full Name'),
@@ -21,15 +22,18 @@ class EmployeeSortForm(forms.Form):
 
 
 class SignInForm(AuthenticationForm):
+    """Form for user sign-in."""
     pass
 
 
 class EmployeeForm(forms.ModelForm):
+    """Form for employee information."""
     class Meta:
         model = Employee
         fields = ['full_name', 'position', 'hire_date', 'email', 'supervisor', 'level']
 
     def __init__(self, *args, **kwargs):
+        """Initialize the EmployeeForm."""
         super(EmployeeForm, self).__init__(*args, **kwargs)
 
         # Отримати унікальні рівні
@@ -43,6 +47,7 @@ class EmployeeForm(forms.ModelForm):
                                                  widget=forms.Select(attrs={'class': 'form-control'}))
 
     def save(self, commit=True):
+        """Override the save method to handle changes in supervisor and reassign subordinates."""
         employees = self.instance.employee_set.all()
         if self.instance.employee_set.all():
             supervisor = Employee.objects.get(pk=self.instance.pk).supervisor
