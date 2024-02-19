@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <h2>{% if form.instance.pk %}Редагування{% else %}Створення{% endif %} співробітника</h2>
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Зберегти</button>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="{% static 'update_supervisors_list.js' %}"></script>
+
+{% endblock %}

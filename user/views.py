@@ -1,12 +1,14 @@
+from .mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import ListView, RedirectView
+from django.views.generic import ListView, RedirectView, DetailView, UpdateView, DeleteView
 from django.http import JsonResponse
 from user.models import Employee
-from .forms import EmployeeSortForm, SignInForm
+from .forms import EmployeeSortForm, SignInForm, EmployeeForm
 from django.db.models import Q
 from django.contrib.auth import logout
+
 
 class EmployeeListView(ListView):
     model = Employee
@@ -15,9 +17,6 @@ class EmployeeListView(ListView):
 
     def get_queryset(self):
         return Employee.objects.filter(level__in=[1, 2])
-
-
-
 
 
 class EmployeesListView(ListView):
@@ -39,13 +38,13 @@ class EmployeesListView(ListView):
                     Q(email__icontains=search_query) |
                     Q(hire_date__icontains=search_query) |
                     Q(level__icontains=search_query)
-                ).order_by('full_name')
+                ).order_by('full_name').exclude(is_superuser=True)
 
             if sort_by:
-                queryset = queryset.order_by(sort_by)
+                queryset = queryset.order_by(sort_by).exclude(is_superuser=True)
 
-            return queryset
-        return Employee.objects.all()
+            return queryset.exclude(is_superuser=True)
+        return Employee.objects.exclude(is_superuser=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -67,7 +66,7 @@ def load_hierarchy(request, employee_id):
     # Підготовити дані для відправки у форматі JSON
     data = {
         'supervisor': {'id': supervisor.id, 'name': supervisor.full_name},
-        'subordinates': [{'id': sub.id, 'name': sub.full_name} for sub in subordinates],
+        'subordinates': [{'id': sub.id, 'name': sub.full_name,'subordinates_count':len(sub.employee_set.all())} for sub in subordinates],
     }
 
     # Повернути дані у форматі JSON
@@ -83,9 +82,9 @@ def load_employee_list(request, search_query=None):
             Q(email__icontains=search_query) |
             Q(hire_date__icontains=search_query) |
             Q(level__icontains=search_query)
-        ).order_by('full_name')
+        ).order_by('full_name').exclude(is_superuser=True)
     else:
-        employees = Employee.objects.all()
+        employees = Employee.objects.all().exclude(is_superuser=True)
 
     # Подготовить данные для возврата в формате JSON
     data = {
@@ -115,3 +114,36 @@ class UserLogoutView(RedirectView):
     def get(self, request, *args, **kwargs):
         logout(request)
         return super(UserLogoutView, self).get(request, *args, **kwargs)
+
+
+class ProfileView(LoginRequiredMixin, DetailView):
+    model = Employee
+    template_name = 'profile.html'
+    context_object_name = 'employee'
+
+
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = Employee
+    template_name = 'employee_form.html'
+    form_class = EmployeeForm
+
+    def get_success_url(self):
+        return reverse_lazy('profile', kwargs={'pk': self.object.pk})
+
+
+
+
+class ProfileDeleteView(LoginRequiredMixin, DeleteView):
+    model = Employee
+    template_name = 'employee_confirm_delete.html'
+    success_url = reverse_lazy('home')
+
+
+def ajax_supervisors(request):
+    selected_level = request.GET.get('level', None)
+    selected_level = int(selected_level) - 1
+    supervisors = Employee.objects.filter(level=selected_level).values('id', 'full_name').exclude(
+        full_name=request.user.full_name)
+
+    return JsonResponse(list(supervisors), safe=False)

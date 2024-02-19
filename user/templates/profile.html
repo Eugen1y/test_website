@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Інформація про співробітника</h2>
+    <p><strong>ПІБ:</strong> {{ employee.full_name }}</p>
+    <p><strong>Посада:</strong> {{ employee.position }}</p>
+    <p><strong>Дата найму:</strong> {{ employee.hire_date }}</p>
+    <p><strong>Email:</strong> {{ employee.email }}</p>
+    <p><strong>Рівень:</strong> {{ employee.level }}</p>
+{% if employee.supervisor %}
+    <p><strong>Начальник:</strong> {{ employee.supervisor }},{{employee.supervisor.level }}</p>
+{% else %}
+<p><strong>Начальник:</strong> немає</p>
+
+{% endif %}
+                    <li><a href="{% url 'employee_update' pk=request.user.pk %}">Update</a></li>
+                    <li><a href="{% url 'employee_delete' pk=request.user.pk %}">Delete</a></li>
+
+{% endblock %}
+
+
+

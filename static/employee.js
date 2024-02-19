@@ -39,8 +39,9 @@ $(document).ready(function() {
         parentContainer.append(subordinatesContainer);
 
         $.each(subordinateData.subordinates, function(index, subordinate) {
-            var subordinateElement = $('<div><span class="employee" data-employee-id="' + subordinate.id + '">' + subordinate.name + '</span></div>');
+            var subordinateElement = $('<div><span class="employee" data-employee-id="' + subordinate.id + '">' + subordinate.name + '(' + subordinate.subordinates_count +')'+ '</span></div>');
             subordinateElement.css('margin-left', indentation + 'px');
+
             subordinatesContainer.append(subordinateElement);
 
             renderSubordinates(subordinate, subordinateElement, indentation);

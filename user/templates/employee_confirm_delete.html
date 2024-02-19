@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Видалення співробітника</h2>
+    <p>Ви впевнені, що хочете видалити співробітника "{{ employee.full_name }}"?</p>
+    <form method="post" action="{% url 'employee_delete' pk=employee.pk %}">
+        {% csrf_token %}
+        <button type="submit">Підтвердити видалення</button>
+    </form>
+{% endblock %}
